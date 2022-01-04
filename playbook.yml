@@ -1,0 +1,5 @@
+- name: Deploy a web application
+  hosts: dbservers
+  roles:
+    - role: mysql
+      #become: Yes

@@ -1,0 +1,64 @@
+---
+# tasks file for mysql
+#
+
+- name: Install required packages
+  package:
+    name:
+      - vim-enhanced
+      - git
+      - powerline-fonts
+      - mysql-server
+      - mysql
+    state: installed 
+  become: yes
+  tags:
+    - install_packages
+- name: Create MySQL configuration file
+  template:
+    src: my.cnf.j2
+    dest: /home/my.cnf
+  notify:
+    - restart mysql
+  become: yes
+
+- name: Start MySQL Service
+  service:
+    name: mysqld
+    state: started
+    enabled: yes  
+  become: yes
+
+#- name: insert iptables rule
+#  lineinfile:
+#    dest: /etc/sysconfig/iptables
+#    state: present
+#    regexp: "{{ mysql_port }}"
+#    insertafter: "^:OUTPUT "
+#    line: "-A INPUT -p tcp  --dport {{ mysql_port }} -j  ACCEPT"
+#  notify: restart iptables
+
+- name: Create a new database with name 'creamer'
+  community.mysql.mysql_db:
+    name: "{{ dbname }}"
+    state: present
+    login_unix_socket: /var/lib/mysql/mysql.sock
+  become: yes
+
+- name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
+  community.mysql.mysql_user:
+    name: "{{ dbuser }}"
+    password: "{{ upassword }}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+  become: yes
+
+#- name: Create role developers, add members
+#  community.mysql.mysql_role:
+#    name: developers
+#    state: present
+#    priv: '*.*:ALL'
+#    members:
+#      - "'{{ dbuser }}'@%"
+#    login_unix_socket: /var/lib/mysql/mysql.sock
+#  become: yes

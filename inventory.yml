@@ -1,0 +1,10 @@
+#all:
+#  hosts:
+#    localhost
+#
+[webservers]
+web3
+
+[dbservers]
+web2
+
